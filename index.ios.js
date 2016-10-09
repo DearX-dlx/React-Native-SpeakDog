@@ -16,6 +16,12 @@ import {
 //导入图标库
 var Icon = require('react-native-vector-icons/Ionicons');
 
+//系统组件
+var Account = require('./app/account/index');
+var Edit = require('./app/edit/index');
+var Common = require('./app/common/index');
+var Creation = require('./app/creation/index');
+
 var SpeakDog = React.createClass({
 
     getInitialState(){
@@ -38,39 +44,35 @@ var SpeakDog = React.createClass({
     //由于Ionicons的Icon.TabBarItem不成熟,因此考虑不使用Icon.TabBarItem,使用RN原生的tabbar组件
     render(){
         return(
-            <TabBarIOS>
+            <TabBarIOS
+                tintColor='orange'
+            >
                 <TabBarIOS.Item
                     icon= {this.state.videocam}
                     selectedIcon={this.state.videocam_s}
                     selected={this.state.selectedTab === 'videocam'}
-                    title="Videocam"
+                    title="列表"
                     onPress={() => {this.setState({selectedTab:'videocam'})}}
                 >
-                    <View style={styles.container}>
-                        <Text style={styles.welcome}> videocam</Text>
-                    </View>
+                    <Creation/>
                 </TabBarIOS.Item>
                 <TabBarIOS.Item
                     icon= {this.state.recording}
                     selectedIcon={this.state.recording_s}
                     selected={this.state.selectedTab === 'recording'}
-                    title="Recording"
+                    title="制作"
                     onPress={() => {this.setState({selectedTab:'recording'})}}
                 >
-                    <View style={styles.container}>
-                        <Text style={styles.welcome}> recording</Text>
-                    </View>
+                    <Edit/>
                 </TabBarIOS.Item>
                 <TabBarIOS.Item
                     icon= {this.state.more}
                     selectedIcon={this.state.more_s}
                     selected={this.state.selectedTab === 'more'}
-                    title="More"
+                    title="账户"
                     onPress={() => {this.setState({selectedTab:'more'})}}
                 >
-                    <View style={styles.container}>
-                        <Text style={styles.welcome}> more</Text>
-                    </View>
+                    <Account/>
                 </TabBarIOS.Item>
 
             </TabBarIOS>
