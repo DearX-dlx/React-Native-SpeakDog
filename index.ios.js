@@ -45,13 +45,13 @@ var SpeakDog = React.createClass({
     render(){
         return(
             <TabBarIOS
-                tintColor='orange'
+                tintColor='#ee735c'
             >
                 <TabBarIOS.Item
                     icon= {this.state.videocam}
                     selectedIcon={this.state.videocam_s}
                     selected={this.state.selectedTab === 'videocam'}
-                    title="列表"
+                    title="视频"
                     onPress={() => {this.setState({selectedTab:'videocam'})}}
                 >
                     <Creation/>

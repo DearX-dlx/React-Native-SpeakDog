@@ -7,32 +7,95 @@ import {
     AppRegistry,
     StyleSheet,
     Text,
-    View
+    View,
+    ListView,
+    Image,
 } from 'react-native';
 
+//屏幕的宽高控制
+var Dimensions = require('Dimensions');
+var screenHeight = Dimensions.get('window').height;
+var screenWidth = Dimensions.get('window').width;
+
 var Creation = React.createClass({
+
+    getInitialState(){
+        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        return {
+            dataSource: ds.cloneWithRows([
+                {
+                    "id":"310000199211234741","thumb":"https://www.baidu.com/img/2016_10_09logo_61d59f1e74db0be41ffe1d31fb8edef3.png","title":"Rldpjv Yhmhm Fbghial Eohofwk Twvhjxka","video":"http://szv1.mukewang.com/md5/e191e522-e8fc-41d4-b1de-f0d049e233d2/H.mp4"
+                }
+                ,
+                {
+                    "id":"130000199102037251","thumb":"https://www.baidu.com/img/2016_10_09logo_61d59f1e74db0be41ffe1d31fb8edef3.png","title":"Hjrbtvjuo Ujhmhvxel Akek Cgnwjgim Ifew","video":"http://szv1.mukewang.com/md5/e191e522-e8fc-41d4-b1de-f0d049e233d2/H.mp4"
+                }
+                ,
+                {
+                    "id":"370000198002265441","thumb":"https://www.baidu.com/img/2016_10_09logo_61d59f1e74db0be41ffe1d31fb8edef3.png","title":"Ureqyepgt Byuc Mqk Uxlqcle Bmolxhbyy","video":"http://szv1.mukewang.com/md5/e191e522-e8fc-41d4-b1de-f0d049e233d2/H.mp4"
+                }
+                ,
+                {
+                    "id":"630000200704033577","thumb":"https://www.baidu.com/img/2016_10_09logo_61d59f1e74db0be41ffe1d31fb8edef3.png","title":"Etpx Wjhyj Bqwj Ncu Eelwqyc","video":"http://szv1.mukewang.com/md5/e191e522-e8fc-41d4-b1de-f0d049e233d2/H.mp4"
+                }
+            ]),
+        };
+    },
+
     render() {
         return (
             <View style={styles.container}>
-                <Text style={styles.welcome}>
-                    Welcome to Creation!
-                </Text>
+                {/*头部*/}
+                <View style={styles.headerView}>
+                    <Text style={styles.headerTitle}>视频列表</Text>
+                </View>
+                {/*列表*/}
+                <ListView
+                    dataSource={this.state.dataSource}
+                    renderRow={this.renderRow}
+                    enableEmptySections={true}
+                    automaticallyAdjustContentInsets={false}
+                />
             </View>
         );
-    }
+    },
+
+    renderRow(rowData){
+        return (
+            <View>
+                <Text style={styles.rowTitle}>{rowData.title}</Text>
+                <Image source={{uri: rowData.thumb}} style={styles.rowImage} />
+                <View>
+                    <View></View>
+                    <View></View>
+                </View>
+            </View>
+        );
+    },
 });
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    welcome: {
-        fontSize: 20,
+    headerView:{
+        paddingTop:25,
+        paddingBottom:12,
+        backgroundColor:'#ee735c'
+    },
+    headerTitle: {
+        fontSize: 16,
         textAlign: 'center',
-        margin: 10,
+        color:'#fff',
+        fontWeight:'600'
+    },
+    rowTitle:{
+        fontSize:14,
+    },
+    rowImage:{
+        width:screenWidth,
+        height:screenWidth * 129 / 270,
     },
 });
 
