@@ -10,12 +10,15 @@ import {
     View,
     ListView,
     Image,
+    TouchableOpacity,
 } from 'react-native';
 
 //屏幕的宽高控制
 var Dimensions = require('Dimensions');
 var screenHeight = Dimensions.get('window').height;
 var screenWidth = Dimensions.get('window').width;
+//导入图标库
+var Icon = require('react-native-vector-icons/Ionicons');
 
 var Creation = React.createClass({
 
@@ -54,7 +57,7 @@ var Creation = React.createClass({
                     dataSource={this.state.dataSource}
                     renderRow={this.renderRow}
                     enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
+                    //automaticallyAdjustContentInsets={false}
                 />
             </View>
         );
@@ -65,9 +68,19 @@ var Creation = React.createClass({
             <View>
                 <Text style={styles.rowTitle}>{rowData.title}</Text>
                 <Image source={{uri: rowData.thumb}} style={styles.rowImage} />
-                <View>
-                    <View></View>
-                    <View></View>
+                <View style={styles.rowContent}>
+                    <TouchableOpacity>
+                        <View style={styles.rowContentItem}>
+                            <Icon name="ios-heart-outline" size={28} color="#900" />
+                            <Text style={styles.rowContentTitle}>喜欢</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                        <View style={styles.rowContentItem}>
+                            <Icon name="ios-chatboxes-outline" size={28} color="#900" />
+                            <Text style={styles.rowContentTitle}>评论</Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -96,6 +109,22 @@ const styles = StyleSheet.create({
     rowImage:{
         width:screenWidth,
         height:screenWidth * 129 / 270,
+    },
+    rowContent:{
+        flexDirection:'row',
+        //justifyContent:'space-between'
+        backgroundColor:'white'
+    },
+    rowContentItem:{
+        width:screenWidth * 0.5,
+        height:35,
+        justifyContent:'center',
+        alignItems:'center',
+        flexDirection:'row',
+    },
+    rowContentTitle:{
+        fontSize:16,
+        marginLeft:10,
     },
 });
 
