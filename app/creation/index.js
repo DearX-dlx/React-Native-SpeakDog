@@ -12,26 +12,30 @@ import {
     Image,
     TouchableOpacity,
     TouchableHighlight,
+    ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
 
-//屏幕的宽高控制
-var Dimensions = require('Dimensions');
-var screenHeight = Dimensions.get('window').height;
-var screenWidth = Dimensions.get('window').width;
-//导入图标库
-var Icon = require('react-native-vector-icons/Ionicons');
-//mock数据解析
-var Mock = require('mockjs');
+//网络模块
+var Request = require('../common/request');
+//数据缓存
+var cacheResults = {
+    page:1,
+    items:[],
+    total:0,
+}
+//rowItem
+var ContentItem = require('./VideoListItem')
 
 var Creation = React.createClass({
-
     getInitialState(){
         var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         return {
             dataSource: ds.cloneWithRows([]),
+            isLoadingTail:false,
+            isRefresh:false,
         };
     },
-
     render() {
         return (
             <View style={styles.container}>
@@ -45,55 +49,120 @@ var Creation = React.createClass({
                     renderRow={this.renderRow}
                     enableEmptySections={true}
                     //automaticallyAdjustContentInsets={false}
+                    //滑动到底的操作
+                    onEndReached={this.fetchMoreData}
+                    //滑动到理低多少的时候算"到底"了
+                    //onEndReachedThreshould={5}
+                    renderFooter={this._renderFooter}
+                    renderHeader={this._renderHeader}
+                    //下拉刷新控件
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.isRefresh}
+                            onRefresh={this._onRefresh}
+                            tintColor="#ff0000"
+                            title="Loading..."
+                            titleColor="#00ff00"
+                        />
+                    }
                 />
             </View>
         );
     },
-
     componentDidMount(){
-        fetch('http://rap.taobao.org/mockjs/8327/api/creations?accessToken=123456')
-            .then((response) => response.json())
-            .then((responseJson) => {
-                var mockData = Mock.mock(responseJson);
-                if(mockData.success){
-                    this.setState({
-                        dataSource:this.state.dataSource.cloneWithRows(mockData.data)
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+        this._fetchData(1)
     },
-
     renderRow(rowData){
-        return (
-                <View>
-                    <Text style={styles.rowTitle}>{rowData.title}</Text>
-                    <Image source={{uri: rowData.thumb}} style={styles.rowImage}>
-                        <TouchableOpacity style={{flex:1}} onPress={() => {alert("hello")}}>
-                            <Icon style={styles.rowPlay} name="ios-play" size={40} color="#900" />
-                        </TouchableOpacity>
-                    </Image>
-                    <View style={styles.rowContent}>
-                        <TouchableOpacity>
-                            <View style={styles.rowContentItem}>
-                                <Icon name="ios-heart-outline" size={28} color="#900" />
-                                <Text style={styles.rowContentTitle}>喜欢</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity>
-                            <View style={styles.rowContentItem}>
-                                <Icon name="ios-chatboxes-outline" size={28} color="#900" />
-                                <Text style={styles.rowContentTitle}>评论</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
+        return(
+            <ContentItem rowData={rowData} />
         );
     },
-
+    _fetchData(page){
+        this.setState({
+            isLoadingTail:true
+        })
+        Request.get('http://rap.taobao.org/mockjs/8327/api/creations',{
+            accessToken:'123456',
+            page:page,
+        })
+            .then((responseData) => {
+                //console.log(responseData);
+                //slice是把数组里面的东西都拿出来,而不改变数组
+                var items = cacheResults.items.slice()
+                items = items.concat(responseData.data)
+                cacheResults.items = items
+                cacheResults.total = responseData.total
+                this.setState({
+                    dataSource:this.state.dataSource.cloneWithRows(cacheResults.items),
+                });
+                this.setState({
+                    isLoadingTail:false
+                })
+            })
+            .catch((error) => {
+                this.setState({
+                    isLoadingTail:false
+                })
+            })
+    },
+    fetchMoreData(){
+        if ((cacheResults.items.length >= cacheResults.total) || this.state.isLoadingTail){
+            return
+        }else {
+            //console.log('items:' + cacheResults.items.length + "total" + cacheResults.total)
+            this._fetchData(1)
+        }
+    },
+    _renderFooter(){
+        if (this.state.isLoadingTail && cacheResults.items.length !== 0){
+            return(
+                <ActivityIndicator
+                    style={{height: 80}}
+                    size="small"
+                />
+            )
+        }else {
+            if (cacheResults.items.length >= cacheResults.total && cacheResults.items.length !== 0){
+                return(
+                    <View style={{alignItems:'center',justifyContent:'center'}}>
+                        <Text style={styles.noMoreDataTitle}>没有更多数据了</Text>
+                    </View>
+                )
+            }
+        }
+    },
+    _renderHeader(){
+        if (cacheResults.items.length === 0){
+            return(
+                <ActivityIndicator
+                    style={{height: 80}}
+                    size="small"
+                />
+            )
+        }
+    },
+    _onRefresh(){
+        this.setState({
+            isRefresh:true
+        })
+        Request.get('http://rap.taobao.org/mockjs/8327/api/creations',{
+            accessToken:'123456',
+            page:0,
+        })
+            .then((responseData) => {
+                this.setState({
+                    dataSource:this.state.dataSource.cloneWithRows(responseData.data),
+                })
+                this.setState({
+                    isRefresh:false
+                })
+            })
+            .catch((error) => {
+                this.setState({
+                    isRefresh:false
+                })
+            })
+    },
 });
 
 const styles = StyleSheet.create({
@@ -112,45 +181,10 @@ const styles = StyleSheet.create({
         color:'#fff',
         fontWeight:'600'
     },
-    rowTitle:{
+    noMoreDataTitle:{
+        paddingTop:10,
+        paddingBottom:10,
         fontSize:14,
-        paddingTop:5,
-        bottom:5,
-        fontWeight:'600'
-    },
-    rowImage:{
-        width:screenWidth,
-        height:screenWidth * 129 / 270,
-    },
-    rowContent:{
-        flexDirection:'row',
-        //justifyContent:'space-between'
-        backgroundColor:'white'
-    },
-    rowContentItem:{
-        width:screenWidth * 0.5,
-        height:35,
-        justifyContent:'center',
-        alignItems:'center',
-        flexDirection:'row',
-    },
-    rowContentTitle:{
-        fontSize:16,
-        marginLeft:10,
-    },
-    rowPlay:{
-        position:'absolute',
-        bottom:14,
-        right:14,
-        width:50,
-        height:50,
-        paddingLeft:18,
-        paddingTop:5,
-
-        borderWidth:1,
-        borderColor:'#fff',
-        borderRadius:25,
-        backgroundColor:'transparent',
     },
 });
 
