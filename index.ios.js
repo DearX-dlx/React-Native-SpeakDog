@@ -11,6 +11,7 @@ import {
   Text,
   View,
   TabBarIOS,
+    Navigator,
 } from 'react-native';
 
 //导入图标库
@@ -54,7 +55,22 @@ var SpeakDog = React.createClass({
                     title="视频"
                     onPress={() => {this.setState({selectedTab:'videocam'})}}
                 >
-                    <Creation/>
+                    <Navigator
+                        initialRoute={{
+                            name:'creation',
+                            component:Creation,
+                        }}
+                        //配置转场动画-- 可选项
+                        configureScene={(router) => {
+                            return Navigator.SceneConfigs.FloatFromRight
+                        }}
+                        renderScene={(route,navigator) => {
+                            //这里拿到的Component其实就是initialRoute方法里面的component
+                            var Component = route.component
+                            //这里可用伪代码表示就是 <list navigator={navigatir}>
+                            return <Component {...route.params} navigator={navigator} />
+                        }}
+                    />
                 </TabBarIOS.Item>
                 <TabBarIOS.Item
                     icon= {this.state.recording}

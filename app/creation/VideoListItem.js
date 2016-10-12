@@ -35,7 +35,7 @@ var ContentItem = React.createClass({
             <View>
                 <Text style={styles.rowTitle}>{rowData.title}</Text>
                 <Image source={{uri: rowData.thumb}} style={styles.rowImage}>
-                    <TouchableOpacity style={{flex:1}} onPress={() => {alert("hello")}}>
+                    <TouchableOpacity style={{flex:1}} onPress={this.props.onSelect}>
                         <Icon style={styles.rowPlay} name="ios-play" size={40} color="#900" />
                     </TouchableOpacity>
                 </Image>
@@ -68,8 +68,10 @@ const styles = StyleSheet.create({
     rowTitle:{
         fontSize:14,
         paddingTop:10,
-        bottom:10,
-        fontWeight:'600'
+        paddingBottom:10,
+        fontWeight:'bold',
+        lineHeight:20,
+        backgroundColor:'white'
     },
     rowImage:{
         width:screenWidth,
@@ -81,6 +83,8 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
         paddingTop:10,
         paddingBottom:10,
+        borderBottomWidth:1,
+        borderBottomColor:'#900'
     },
     rowContentItem:{
         width:screenWidth * 0.5,

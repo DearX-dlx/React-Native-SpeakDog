@@ -26,6 +26,7 @@ var cacheResults = {
 }
 //rowItem
 var ContentItem = require('./VideoListItem')
+var Detail = require('./ContentDetail');
 
 var Creation = React.createClass({
     getInitialState(){
@@ -74,7 +75,10 @@ var Creation = React.createClass({
     },
     renderRow(rowData){
         return(
-            <ContentItem rowData={rowData} />
+            <ContentItem key={rowData.id}
+                         onSelect={() => this._loadPage(rowData)}
+                         rowData={rowData}
+            />
         );
     },
     _fetchData(page){
@@ -162,6 +166,13 @@ var Creation = React.createClass({
                     isRefresh:false
                 })
             })
+    },
+    _loadPage(rowData){
+        this.props.navigator.push({
+            name:'detail',
+            component:Detail,
+            params:{rowData:rowData}
+        })
     },
 });
 
