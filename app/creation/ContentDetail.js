@@ -13,6 +13,8 @@ import {
     ScrollView,
     Image,
     ListView,
+    TextInput,
+    Modal,
 } from 'react-native';
 //后面的default叫默认倒出 倒出一些参数的
 var Video = require('react-native-video').default
@@ -36,6 +38,11 @@ var ContentDetail = React.createClass({
             playProcess:1,
             isVideoStop:true,
             isNetWorkingError:false,
+
+            //modal
+            modalVisiable:false,
+            comment:'',
+            commentBtnDisable:false,
         }
     },
 
@@ -93,24 +100,106 @@ var ContentDetail = React.createClass({
                         dataSource={this.state.dataSource}
                         renderRow={this.renderRow}
                         enableEmptySections={true}
+                        renderHeader={this._renderHeader}
                     />
                 </ScrollView>
+                {/*modal视图区*/}
+                <Modal
+                    animationType={'fade'}
+                    visible={this.state.modalVisiable}
+                >
+                    <View style={{backgroundColor:'white',flex:1,alignItems:'center'}}>
+                        <Icon name="ios-close-outline" size={60} color="red" onPress={() => {this._setModalVisiable(false)}}/>
+                        <TextInput
+                            style={{height: 120, borderColor: 'lightgray', borderWidth: 1,margin:10,fontSize:14,borderRadius:10,padding:10}}
+                            placeholder='别只知道看,也评论一下啊'
+                            multiline={true}
+                            onChangeText={this._commentTextChange}
+                        />
+                        <TouchableOpacity
+                            style={{justifyContent:'center',alignItems:'center',width:screenWidth - 40,backgroundColor:'#ee735c',borderRadius:20,height:40}}
+                            onPress={this._clickComment}
+                            disabled={this.state.commentBtnDisable}
+                        >
+                            <Text style={{color:'white'}}>提交评论</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View>
         );
     },
 
+    _commentTextChange(text){
+        //console.log(text);
+        this.setState({
+            comment:text
+        })
+    },
+
+    _clickComment() {
+        this.setState({
+            commentBtnDisable:true,
+        })
+        //进行网络交互
+        Request.post('http://rap.taobao.org/mockjs/8327/api/comment',{
+            'token':'123456',
+            'userID':'123456',
+            'videoID':'123456',
+            'comment':this.state.comment
+        }).then((data) => {
+            console.log(data)
+            if (data.success){
+                this.setState({
+                    modalVisiable:false,
+                    commentBtnDisable:false,
+                })
+            }
+        }).catch((error) => {
+            alert("评论失败")
+            this.setState({
+                commentBtnDisable:false,
+            })
+        })
+
+    },
+    _renderHeader(){
+        return(
+            <View>
+                <TextInput
+                    style={{height: 60, borderColor: 'lightgray', borderWidth: 1,margin:10,fontSize:14,borderRadius:10,padding:10}}
+                    placeholder='别只知道看,也评论一下啊'
+                    multiline={true}
+                    onFocus={this._commentInputFocus}
+                />
+                <Text style={{margin:10,fontSize:14,fontWeight:'600'}}>精彩评论</Text>
+                <View style={{height:1,backgroundColor:'lightgray',marginLeft:10,marginRight:10}}></View>
+            </View>
+        )
+    },
+
     componentDidMount(){
         //获取网络数据
-        Request.get('http://rap.taobao.org/mockjs/8327/api/comment',{
+        Request.get('http://rap.taobao.org/mockjs/8327/api/commentList',{
             'accessToken':'123456',
             'id':'123456'
         }).then((data) => {
             //console.log(data)
-            this.setState({
-                dataSource:this.state.dataSource.cloneWithRows(data.data)
-            })
+            if (data.success){
+                this.setState({
+                    dataSource:this.state.dataSource.cloneWithRows(data.data)
+                })
+            }
         }).catch((error) => {
             console.log(error)
+        })
+    },
+
+    _commentInputFocus(){
+        this._setModalVisiable(true)
+    },
+    _setModalVisiable(isVisiable){
+        this.setState({
+            modalVisiable:isVisiable
         })
     },
 
