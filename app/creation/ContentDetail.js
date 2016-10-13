@@ -10,6 +10,9 @@ import {
     View,
     ActivityIndicator,
     TouchableOpacity,
+    ScrollView,
+    Image,
+    ListView,
 } from 'react-native';
 //后面的default叫默认倒出 倒出一些参数的
 var Video = require('react-native-video').default
@@ -19,11 +22,15 @@ var screenHeight = Dimensions.get('window').height;
 var screenWidth = Dimensions.get('window').width;
 //导入图标库
 var Icon = require('react-native-vector-icons/Ionicons');
+//网络模块
+var Request = require('../common/request');
 
 var ContentDetail = React.createClass({
 
     getInitialState(){
+        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         return{
+            dataSource: ds.cloneWithRows(['sfasd','dasdasd','dasdasdasd']),
             videoLoading:false,
             isPlaying:false,
             playProcess:1,
@@ -34,6 +41,7 @@ var ContentDetail = React.createClass({
 
     render() {
         var rowData = this.props.rowData
+        //console.log(rowData)
         return (
             <View style={styles.container}>
                 {/*头部*/}
@@ -44,9 +52,7 @@ var ContentDetail = React.createClass({
                         <Text style={{color:'white',marginLeft:2}}> 返回</Text>
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.welcome} onPress={() => {this.props.navigator.pop()}}>
-                    {rowData.title}
-                </Text>
+                {/*视频播放控制区*/}
                 <View style={styles.videoViewStyle}>
                     <Video ref='videoPlay'
                            source={{uri: rowData.video}} // Can be a URL or a local file.
@@ -73,9 +79,53 @@ var ContentDetail = React.createClass({
                         <View style={[styles.processS,{width:this.state.playProcess}]}></View>
                     </View>
                 </View>
+                {/*视频信息展示区*/}
+                <ScrollView>
+                    <View style={styles.videoDetailViewS}>
+                        <Image style={styles.headPortraitS} source={{uri:rowData.headPortraits}}/>
+                        <View style={{flexDirection:'column',flex:1}}>
+                            <Text style={{fontSize:16,fontWeight:'600'}}>{rowData.author}</Text>
+                            <Text style={{fontSize:14,color:'gray',marginTop:5}}>{rowData.title}</Text>
+                        </View>
+                    </View>
+                    {/*评论展示区*/}
+                    <ListView
+                        dataSource={this.state.dataSource}
+                        renderRow={this.renderRow}
+                        enableEmptySections={true}
+                    />
+                </ScrollView>
             </View>
         );
     },
+
+    componentDidMount(){
+        //获取网络数据
+        Request.get('http://rap.taobao.org/mockjs/8327/api/comment',{
+            'accessToken':'123456',
+            'id':'123456'
+        }).then((data) => {
+            //console.log(data)
+            this.setState({
+                dataSource:this.state.dataSource.cloneWithRows(data.data)
+            })
+        }).catch((error) => {
+            console.log(error)
+        })
+    },
+
+    renderRow(rowData){
+        return(
+            <View style={{flexDirection:'row',alignItems:'center',marginTop:5,marginBottom:5}}>
+                <Image source={{uri:rowData.commentAuthorHP}} style={{width:40,height:40,marginLeft:5,marginRight:5,borderRadius:20}} />
+                <View style={{flex:1,flexDirection:'column'}}>
+                    <Text style={{fontSize:14,marginBottom:5}}>{rowData.commentAuthor}</Text>
+                    <Text style={{fontSize:12,color:'gray'}}>{rowData.comment}</Text>
+                </View>
+            </View>
+        )
+    },
+
     _clickPlay(){
 
         //如果不是暂停的就播放
@@ -213,7 +263,20 @@ const styles = StyleSheet.create({
         textAlign:'center',
         color:'white',
         paddingTop:145,
-    }
+    },
+    videoDetailViewS:{
+        flexDirection:'row',
+        alignItems:'center',
+        marginTop:10,
+    },
+    headPortraitS:{
+        height:60,
+        width:60,
+        borderRadius:20,
+        marginLeft:10,
+        marginRight:10,
+    },
+
 });
 
 module.exports = ContentDetail;

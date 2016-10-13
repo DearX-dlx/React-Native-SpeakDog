@@ -22,7 +22,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var ContentItem = React.createClass({
 
     getInitialState(){
-        var rowData = this.props.rowData
+        let rowData = this.props.rowData
         return{
             up:rowData.voted,
             rowData:rowData
@@ -30,7 +30,7 @@ var ContentItem = React.createClass({
     },
 
     render(){
-        var rowData = this.state.rowData
+        let rowData = this.state.rowData
         return(
             <View>
                 <Text style={styles.rowTitle}>{rowData.title}</Text>
@@ -61,6 +61,7 @@ var ContentItem = React.createClass({
         this.setState({
             up:!this.state.up,
         });
+
     },
 })
 
