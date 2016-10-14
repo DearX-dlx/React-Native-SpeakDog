@@ -6,28 +6,29 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,
-  TabBarIOS,
+    AppRegistry,
+    StyleSheet,
+    Text,View,
+    TabBarIOS,
     Navigator,
+    AsyncStorage
 } from 'react-native';
 
 //导入图标库
 var Icon = require('react-native-vector-icons/Ionicons');
-
 //系统组件
 var Account = require('./app/account/index');
 var Edit = require('./app/edit/index');
 var Common = require('./app/common/index');
 var Creation = require('./app/creation/index');
+var Login = require('./app/account/login');
 
 var SpeakDog = React.createClass({
 
     getInitialState(){
         return({
-            selectedTab: 'videocam'
+            selectedTab: 'videocam',
+            logined:false
         });
     },
     componentWillMount() {
@@ -40,10 +41,17 @@ var SpeakDog = React.createClass({
 
         Icon.getImageSource('ios-videocam-outline', 30).then((source) => this.setState({ videocam: source }));
         Icon.getImageSource('ios-videocam', 30).then((source) => this.setState({ videocam_s: source }));
+
+        this._asyncAppStatus()
     },
 
     //由于Ionicons的Icon.TabBarItem不成熟,因此考虑不使用Icon.TabBarItem,使用RN原生的tabbar组件
     render(){
+
+        if (!this.state.logined){
+            return <Login afterLogin={this.afterLogin}/>
+        }
+
         return(
             <TabBarIOS
                 tintColor='#ee735c'
@@ -93,6 +101,36 @@ var SpeakDog = React.createClass({
 
             </TabBarIOS>
         );
+    },
+
+    //登录成功的数据回调
+    afterLogin(data){
+        //console.log(data)
+        //进行数据的存储
+        var that = this
+        user = JSON.stringify(data)
+        AsyncStorage.setItem('user', user)
+            .then(() => {
+                that.setState({
+                    logined:true,
+                    user:user
+                })
+            })
+    },
+
+    _asyncAppStatus(){
+        console.log('hello')
+        //拿到上下文
+        var that = this
+        AsyncStorage.getItem('user')
+            .then((data) => {
+                //console.log(data)
+                var user = JSON.parse(data)
+                that.setState({
+                    user:user,
+                    logined:true
+                })
+            })
     },
 });
 

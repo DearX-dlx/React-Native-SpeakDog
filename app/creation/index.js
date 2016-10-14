@@ -40,9 +40,9 @@ var Creation = React.createClass({
     render() {
         return (
             <View style={styles.container}>
-                {/*头部*/}
-                <View style={styles.headerView}>
-                    <Text style={styles.headerTitle}>视频列表</Text>
+                {/*导航栏*/}
+                <View style={{height:64,paddingTop:20,alignItems:'center',justifyContent:'center',backgroundColor:"#ee735c"}}>
+                    <Text style={{color:'white',fontSize:16, color:'#fff', fontWeight:'600'}}>视频列表</Text>
                 </View>
                 {/*列表*/}
                 <ListView
@@ -85,7 +85,7 @@ var Creation = React.createClass({
         this.setState({
             isLoadingTail:true
         })
-        Request.get('http://rap.taobao.org/mockjs/8327/api/creations',{
+        Request.get('/api/creations',{
             accessToken:'123456',
             page:page,
         })
@@ -149,7 +149,7 @@ var Creation = React.createClass({
         this.setState({
             isRefresh:true
         })
-        Request.get('http://rap.taobao.org/mockjs/8327/api/creations',{
+        Request.get('/api/creations',{
             accessToken:'123456',
             page:0,
         })

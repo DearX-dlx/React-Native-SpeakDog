@@ -141,7 +141,7 @@ var ContentDetail = React.createClass({
             commentBtnDisable:true,
         })
         //进行网络交互
-        Request.post('http://rap.taobao.org/mockjs/8327/api/comment',{
+        Request.post('/api/comment',{
             'token':'123456',
             'userID':'123456',
             'videoID':'123456',
@@ -179,7 +179,7 @@ var ContentDetail = React.createClass({
 
     componentDidMount(){
         //获取网络数据
-        Request.get('http://rap.taobao.org/mockjs/8327/api/commentList',{
+        Request.get('/api/commentList',{
             'accessToken':'123456',
             'id':'123456'
         }).then((data) => {
