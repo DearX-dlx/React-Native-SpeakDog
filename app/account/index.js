@@ -16,6 +16,24 @@ import {
 var Dimensions = require('Dimensions');
 var screenHeight = Dimensions.get('window').height;
 var screenWidth = Dimensions.get('window').width;
+//图片选择组件
+var ImagePicker = require('react-native-image-picker');
+var Platform = require('react-native').Platform;
+var options = {
+    title: '选择照片',
+    cancelButtonTitle:'取消',
+    takePhotoButtonTitle:'拍照',
+    chooseFromLibraryButtonTitle:'相册',
+    mediaType:'photo',
+    allowsEditing:true,
+    // customButtons: [
+    //     {name: 'fb', title: 'Choose Photo from Facebook'},
+    // ],
+    storageOptions: {
+        skipBackup: true,
+        path: 'images'
+    }
+};
 
 var Account = React.createClass({
 
@@ -38,8 +56,9 @@ var Account = React.createClass({
                            resizeMode="cover"
                     >
                         <TouchableOpacity
-                            style={{position:'absolute',top:1,left:1,bottom:1,right:1,alignItems:'center',justifyContent:'center'}}
+                            style={{position:'absolute',top:50,left:100,bottom:50,right:100,alignItems:'center',justifyContent:'center'}}
                             onPress={this._pickImage}
+                            activeOpacity={0.8}
                         >
                             <Image source={{uri:this.state.headImage}}
                                    style={{width:80,height:80,borderRadius:40}}
@@ -52,8 +71,35 @@ var Account = React.createClass({
     },
 
     _pickImage(){
+        ImagePicker.showImagePicker(options, (response) => {
+            console.log('Response = ', response);
 
-    },
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+            }
+            else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+            }
+            // else if (response.customButton) {
+            //     console.log('User tapped custom button: ', response.customButton);
+            // }
+            else {
+                // You can display the image using either data...
+                const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+
+                // or a reference to the platform specific asset location
+                if (Platform.OS === 'ios') {
+                    const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+                } else {
+                    const source = {uri: response.uri, isStatic: true};
+                }
+
+                this.setState({
+                    headImage: response.uri.replace('file://', '')
+                });
+            }
+        })
+    }
 });
 
 const styles = StyleSheet.create({
