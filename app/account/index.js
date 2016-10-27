@@ -16,6 +16,8 @@ import {
 var Dimensions = require('Dimensions');
 var screenHeight = Dimensions.get('window').height;
 var screenWidth = Dimensions.get('window').width;
+//sha1加密
+var sha1 = require('sha1');
 //图片选择组件
 var ImagePicker = require('react-native-image-picker');
 var Platform = require('react-native').Platform;
@@ -34,6 +36,17 @@ var options = {
         path: 'images'
     }
 };
+
+//图片上传api数据
+var CLOUDINARY = {
+    'cloud_name': 'speakdog',
+    'api_key': '223944527726924',
+    'api_secret': 'LVeH4yoF-0F73AlqmBb51de2rFM',
+    'base':'http://res.cloudinary.com/dearx',
+    'image':'https://api.cloudinary.com/v1_1/dearx/image/upload',
+    'video':'https://api.cloudinary.com/v1_1/dearx/video/upload',
+    'audio':'https://api.cloudinary.com/v1_1/dearx/raw/upload',
+}
 
 var Account = React.createClass({
 
@@ -72,7 +85,7 @@ var Account = React.createClass({
 
     _pickImage(){
         ImagePicker.showImagePicker(options, (response) => {
-            console.log('Response = ', response);
+            //console.log('Response = ', response);
 
             if (response.didCancel) {
                 console.log('User cancelled image picker');
@@ -97,10 +110,80 @@ var Account = React.createClass({
                 this.setState({
                     headImage: response.uri.replace('file://', '')
                 });
+
+                //上传图片设置 -- 拼接签名
+                //文件夹位置
+                let folder = 'avatar'
+                let tags = 'app,avatar' //标签
+                let timestamp = Date.now() //时间戳
+                //进行signature数字签名
+                //"public_id=图片id&timestamp=时间戳+API的secret"
+                let public_id = 'avatar'
+                let signature = 'public_id=' + public_id + "&timestamp=" + timestamp + CLOUDINARY.api_secret
+                //console.log(signature)
+                signature = sha1(signature)
+                //发送表单进行上传
+                //body
+                /*
+                 timestamp: 1315060510
+                 public_id: "sample_image"
+                 api_key: "1234"
+                 file: "http://www.example.com/sample.jpg"
+                 signature: "b4ad47fb4e25c7bf5f92a20089f9db59bc302313"
+                 */
+                var body = new FormData()
+                body.append('timestamp',timestamp)
+                body.append('public_id',public_id)
+                body.append('api_key',CLOUDINARY.api_key)
+                //注意这里文件的格式
+                body.append('file',{uri: this.state.headImage, type: 'image/jpg', name: 'image.jpg'})
+                body.append('signature',signature)
+                this._upload(body)
             }
         })
-    }
+    },
+
+    //上传图片
+    _upload(body){
+
+        var xhr = new XMLHttpRequest()
+        var url = CLOUDINARY.image
+
+        xhr.open('POST',url)
+        xhr.onload = () => {
+            if (xhr.status !== 200) {
+                alert('请求失败')
+                console.log(xhr.responseText)
+                return
+            }
+            if (!xhr.responseText) {
+                alert('请求失败')
+                return
+            }
+
+            //console.log(xhr.response)
+            //进行json转换
+            var respose
+            try {
+                respose = JSON.parse(xhr.response)
+            }catch (e) {
+                console.log(e)
+                console.log('parse fails')
+            }
+
+            if (respose && respose.public_id) {
+                let headImgAddr = avatar(respose.public_id,'image')
+                console.log('图片地址' + headImgAddr)
+            }
+        }
+        xhr.send(body)
+    },
+
 });
+//拼接图片地址
+function avatar (id,type) {
+    return CLOUDINARY.base + '/' + type + '/upload/' + id
+}
 
 const styles = StyleSheet.create({
     container: {

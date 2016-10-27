@@ -16,6 +16,7 @@
     "react-native-sk-countdown": "^1.0.1",
     "react-native-vector-icons": "^2.1.0",
     "react-native-video": "^0.9.0",
-    "react-timer-mixin": "^0.13.3"
+    "react-timer-mixin": "^0.13.3",
+    "sha1": "^1.1.1"
   }
 }
